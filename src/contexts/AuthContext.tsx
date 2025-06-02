@@ -29,6 +29,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check for demo user first
+    const demoUser = localStorage.getItem('demo-user');
+    if (demoUser) {
+      setUser(JSON.parse(demoUser));
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
@@ -47,7 +55,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signOut = async () => {
     try {
+      // Clear demo user if exists
+      localStorage.removeItem('demo-user');
+      
       await firebaseSignOut(auth);
+      setUser(null);
     } catch (error) {
       console.error('Error signing out:', error);
     }
