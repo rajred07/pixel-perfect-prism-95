@@ -31,9 +31,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   </svg>`;
 
   return (
-    <div className="flex justify-between items-center border px-10 py-3 border-[#E5E8EB] max-md:px-6 max-md:py-3 max-sm:px-4 max-sm:py-3">
+    <div className="flex justify-between items-center border px-10 py-3 border-[#362B2B] max-md:px-6 max-md:py-3 max-sm:px-4 max-sm:py-3">
       <div className="flex items-center gap-4">
-        <div className="flex flex-col" />
         <h1 className="text-white text-lg font-bold leading-[23px] h-[23px]">
           Movie Chatbot
         </h1>

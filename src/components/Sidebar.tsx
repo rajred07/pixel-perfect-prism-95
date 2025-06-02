@@ -2,14 +2,28 @@
 import React from 'react';
 import { NavigationItem } from './NavigationItem';
 
+interface Movie {
+  id: string;
+  title: string;
+  year?: string;
+}
+
 interface SidebarProps {
   onCategorySelect?: (category: string) => void;
   selectedCategory?: string;
+  movies?: Movie[];
+  selectedMovie?: string | null;
+  onMovieSelect?: (movie: Movie) => void;
+  currentCategoryLabel?: string;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   onCategorySelect,
-  selectedCategory
+  selectedCategory,
+  movies = [],
+  selectedMovie,
+  onMovieSelect,
+  currentCategoryLabel
 }) => {
   const navigationItems = [
     {
@@ -39,62 +53,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </defs>
       </svg>`,
       label: 'Chat History'
-    },
-    {
-      id: 'bollywood',
-      icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-[24px]">
-        <g clip-path="url(#clip0_2507_571)">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M20.25 9.75H9.57094L19.6875 7.07906C19.8809 7.0281 20.046 6.90199 20.146 6.72876C20.2459 6.55553 20.2726 6.34954 20.22 6.15656L19.455 3.34406C19.2359 2.55665 18.4245 2.09165 17.6344 2.30063L3.35719 6.06938C2.97317 6.16906 2.64542 6.41909 2.44781 6.76312C2.24907 7.10299 2.19664 7.50892 2.3025 7.88812L3 10.4587C3 10.4719 3 10.4859 3 10.5V18.75C3 19.5784 3.67157 20.25 4.5 20.25H19.5C20.3284 20.25 21 19.5784 21 18.75V10.5C21 10.0858 20.6642 9.75 20.25 9.75V9.75ZM18.015 3.75L18.5775 5.81906L16.4569 6.38156L13.8206 4.85906L18.015 3.75ZM11.7628 5.4L14.3991 6.9225L10.9359 7.83656L8.29969 6.31594L11.7628 5.4ZM4.31906 9.58313L3.75656 7.51312L6.24094 6.85687L8.87719 8.38125L4.31906 9.58313ZM19.5 18.75H4.5V11.25H19.5V18.75V18.75Z" fill="white"></path>
-        </g>
-        <defs>
-          <clipPath id="clip0_2507_571">
-            <rect width="24" height="24" fill="white"></rect>
-          </clipPath>
-        </defs>
-      </svg>`,
-      label: 'Bollywood'
-    },
-    {
-      id: 'hollywood',
-      icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-[24px]">
-        <g clip-path="url(#clip0_2507_578)">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M20.25 9.75H9.57094L19.6875 7.07906C19.8809 7.0281 20.046 6.90199 20.146 6.72876C20.2459 6.55553 20.2726 6.34954 20.22 6.15656L19.455 3.34406C19.2359 2.55665 18.4245 2.09165 17.6344 2.30063L3.35719 6.06938C2.97317 6.16906 2.64542 6.41909 2.44781 6.76312C2.24907 7.10299 2.19664 7.50892 2.3025 7.88812L3 10.4587C3 10.4719 3 10.4859 3 10.5V18.75C3 19.5784 3.67157 20.25 4.5 20.25H19.5C20.3284 20.25 21 19.5784 21 18.75V10.5C21 10.0858 20.6642 9.75 20.25 9.75V9.75ZM18.015 3.75L18.5775 5.81906L16.4569 6.38156L13.8206 4.85906L18.015 3.75ZM11.7628 5.4L14.3991 6.9225L10.9359 7.83656L8.29969 6.31594L11.7628 5.4ZM4.31906 9.58313L3.75656 7.51312L6.24094 6.85687L8.87719 8.38125L4.31906 9.58313ZM19.5 18.75H4.5V11.25H19.5V18.75V18.75Z" fill="white"></path>
-        </g>
-        <defs>
-          <clipPath id="clip0_2507_578">
-            <rect width="24" height="24" fill="white"></rect>
-          </clipPath>
-        </defs>
-      </svg>`,
-      label: 'Hollywood'
-    },
-    {
-      id: 'anime',
-      icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-[24px]">
-        <g clip-path="url(#clip0_2507_585)">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M20.25 9.75H9.57094L19.6875 7.07906C19.8809 7.0281 20.046 6.90199 20.146 6.72876C20.2459 6.55553 20.2726 6.34954 20.22 6.15656L19.455 3.34406C19.2359 2.55665 18.4245 2.09165 17.6344 2.30063L3.35719 6.06938C2.97317 6.16906 2.64542 6.41909 2.44781 6.76312C2.24907 7.10299 2.19664 7.50892 2.3025 7.88812L3 10.4587C3 10.4719 3 10.4859 3 10.5V18.75C3 19.5784 3.67157 20.25 4.5 20.25H19.5C20.3284 20.25 21 19.5784 21 18.75V10.5C21 10.0858 20.6642 9.75 20.25 9.75V9.75ZM18.015 3.75L18.5775 5.81906L16.4569 6.38156L13.8206 4.85906L18.015 3.75ZM11.7628 5.4L14.3991 6.9225L10.9359 7.83656L8.29969 6.31594L11.7628 5.4ZM4.31906 9.58313L3.75656 7.51312L6.24094 6.85687L8.87719 8.38125L4.31906 9.58313ZM19.5 18.75H4.5V11.25H19.5V18.75V18.75Z" fill="white"></path>
-        </g>
-        <defs>
-          <clipPath id="clip0_2507_585">
-            <rect width="24" height="24" fill="white"></rect>
-          </clipPath>
-        </defs>
-      </svg>`,
-      label: 'Anime/Manga'
-    },
-    {
-      id: 'dramas',
-      icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-[24px]">
-        <g clip-path="url(#clip0_2507_585)">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M20.25 9.75H9.57094L19.6875 7.07906C19.8809 7.0281 20.046 6.90199 20.146 6.72876C20.2459 6.55553 20.2726 6.34954 20.22 6.15656L19.455 3.34406C19.2359 2.55665 18.4245 2.09165 17.6344 2.30063L3.35719 6.06938C2.97317 6.16906 2.64542 6.41909 2.44781 6.76312C2.24907 7.10299 2.19664 7.50892 2.3025 7.88812L3 10.4587C3 10.4719 3 10.4859 3 10.5V18.75C3 19.5784 3.67157 20.25 4.5 20.25H19.5C20.3284 20.25 21 19.5784 21 18.75V10.5C21 10.0858 20.6642 9.75 20.25 9.75V9.75ZM18.015 3.75L18.5775 5.81906L16.4569 6.38156L13.8206 4.85906L18.015 3.75ZM11.7628 5.4L14.3991 6.9225L10.9359 7.83656L8.29969 6.31594L11.7628 5.4ZM4.31906 9.58313L3.75656 7.51312L6.24094 6.85687L8.87719 8.38125L4.31906 9.58313ZM19.5 18.75H4.5V11.25H19.5V18.75V18.75Z" fill="white"></path>
-        </g>
-        <defs>
-          <clipPath id="clip0_2507_585">
-            <rect width="24" height="24" fill="white"></rect>
-          </clipPath>
-        </defs>
-      </svg>`,
-      label: 'Dramas'
     }
   ];
 
@@ -111,8 +69,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <nav className="flex flex-col w-[319px] max-md:w-full max-md:h-auto max-sm:hidden">
-      <div className="flex min-h-[700px] flex-col justify-between bg-[#171212] p-4 max-md:min-h-[auto]">
-        <div className="flex flex-col gap-4">
+      <div className="flex min-h-[700px] flex-col bg-[#171212] p-4 max-md:min-h-[auto]">
+        <div className="flex flex-col gap-4 flex-1">
           <div className="text-white text-base font-medium leading-6">
             Movie Chatbot
           </div>
@@ -127,8 +85,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
               />
             ))}
           </div>
+          
+          {/* Dynamic Movie List */}
+          {currentCategoryLabel && movies.length > 0 && (
+            <div className="flex flex-col gap-2 mt-4">
+              <div className="text-gray-400 text-sm font-medium leading-5 px-3">
+                {currentCategoryLabel} Movies
+              </div>
+              <div className="flex flex-col gap-1 max-h-[300px] overflow-y-auto">
+                {movies.map((movie) => (
+                  <button
+                    key={movie.id}
+                    onClick={() => onMovieSelect?.(movie)}
+                    className={`flex flex-col items-start gap-1 px-3 py-2 rounded-xl w-full text-left transition-colors ${
+                      selectedMovie === movie.title
+                        ? 'bg-[#362B2B] text-white'
+                        : 'text-gray-300 hover:bg-[#362B2B]/50 hover:text-white'
+                    }`}
+                  >
+                    <div className="text-sm font-medium">{movie.title}</div>
+                    {movie.year && (
+                      <div className="text-xs text-gray-400">{movie.year}</div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-        <div className="flex flex-col gap-1">
+        
+        <div className="flex flex-col gap-1 mt-4">
           <NavigationItem
             icon={settingsIcon}
             label="Settings"

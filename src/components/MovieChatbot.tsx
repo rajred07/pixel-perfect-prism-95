@@ -5,7 +5,6 @@ import { ChatHeader } from './ChatHeader';
 import { ChatArea } from './ChatArea';
 import { MessageInput } from './MessageInput';
 import { TopNavigation } from './TopNavigation';
-import { MovieSection } from './MovieSection';
 
 interface Message {
   id: string;
@@ -72,11 +71,18 @@ const movieData = {
   ]
 };
 
+const categoryLabels = {
+  bollywood: 'Bollywood',
+  hollywood: 'Hollywood',
+  anime: 'Anime/Manga',
+  dramas: 'Dramas'
+};
+
 export const MovieChatbot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      message: 'Hello! How can I help you today?',
+      message: 'Hello! How can I help you today? Select a category from the top navigation and choose a movie to get started.',
       sender: 'bot',
       timestamp: new Date().toISOString()
     }
@@ -85,24 +91,23 @@ export const MovieChatbot: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('new-chat');
   const [selectedTopCategory, setSelectedTopCategory] = useState<string>('');
   const [selectedMovie, setSelectedMovie] = useState<string | null>(null);
-  const [showMovieSection, setShowMovieSection] = useState<boolean>(false);
 
   const getWelcomeMessage = (category: string): string => {
     switch (category) {
       case 'bollywood':
-        return `Welcome to Bollywood movies! Here are some popular Bollywood films:\n\n${movieData.bollywood.map((movie, index) => `${index + 1}. ${movie.title} (${movie.year})`).join('\n')}\n\nWhich movie would you like to know more about?`;
+        return `Welcome to Bollywood movies! Here are some popular Bollywood films. Please select a movie from the sidebar to get started with your questions.`;
       case 'hollywood':
-        return `Welcome to Hollywood movies! Here are some popular Hollywood films:\n\n${movieData.hollywood.map((movie, index) => `${index + 1}. ${movie.title} (${movie.year})`).join('\n')}\n\nWhich movie would you like to know more about?`;
+        return `Welcome to Hollywood movies! Here are some popular Hollywood films. Please select a movie from the sidebar to get started with your questions.`;
       case 'anime':
-        return `Welcome to Anime/Manga! Here are some popular anime:\n\n${movieData.anime.map((movie, index) => `${index + 1}. ${movie.title} (${movie.year})`).join('\n')}\n\nWhich anime would you like to know more about?`;
+        return `Welcome to Anime/Manga! Here are some popular anime titles. Please select one from the sidebar to get started with your questions.`;
       case 'dramas':
-        return `Welcome to Dramas! Here are some popular TV dramas:\n\n${movieData.dramas.map((movie, index) => `${index + 1}. ${movie.title} (${movie.year})`).join('\n')}\n\nWhich drama would you like to know more about?`;
+        return `Welcome to TV Dramas! Here are some popular drama series. Please select one from the sidebar to get started with your questions.`;
       case 'chat-history':
         return 'Here is your chat history. You can review your previous conversations here.';
       case 'settings':
         return 'Settings panel - Here you can customize your chat experience, change themes, and manage your preferences.';
       default:
-        return 'Hello! How can I help you today?';
+        return 'Hello! How can I help you today? Select a category from the top navigation and choose a movie to get started.';
     }
   };
 
@@ -122,6 +127,8 @@ export const MovieChatbot: React.FC = () => {
       
       if (selectedMovie) {
         response = `Thanks for asking about "${message}". Since we're discussing "${selectedMovie}", I can provide specific information about this ${selectedTopCategory} title. How can I help you learn more about it?`;
+      } else {
+        response = `Thanks for asking about "${message}". Please select a movie from the sidebar first so I can provide specific information about it.`;
       }
       
       const botResponse: Message = {
@@ -136,8 +143,8 @@ export const MovieChatbot: React.FC = () => {
 
   const handleSidebarCategorySelect = (category: string) => {
     setSelectedCategory(category);
-    setShowMovieSection(false);
     setSelectedTopCategory('');
+    setSelectedMovie(null);
     
     // Create a new chat with appropriate welcome message
     const welcomeMessage = getWelcomeMessage(category);
@@ -151,7 +158,6 @@ export const MovieChatbot: React.FC = () => {
 
   const handleTopCategorySelect = (category: string) => {
     setSelectedTopCategory(category);
-    setShowMovieSection(true);
     setSelectedMovie(null);
     
     // Create a new chat with category-specific welcome message
@@ -170,7 +176,7 @@ export const MovieChatbot: React.FC = () => {
     // Send a message about the selected movie
     const movieMessage: Message = {
       id: Date.now().toString(),
-      message: `Great choice! I've set "${movie.title}" as our current discussion topic. Feel free to ask me anything about this ${selectedTopCategory} title - plot, characters, reviews, or any other questions you might have!`,
+      message: `Great choice! I've set "${movie.title}" as our current discussion topic. Feel free to ask me anything about this ${categoryLabels[selectedTopCategory as keyof typeof categoryLabels]} title - plot, characters, reviews, or any other questions you might have!`,
       sender: 'bot',
       timestamp: new Date().toISOString()
     };
@@ -181,11 +187,19 @@ export const MovieChatbot: React.FC = () => {
     return movieData[selectedTopCategory as keyof typeof movieData] || [];
   };
 
+  const getCurrentCategoryLabel = (): string => {
+    return categoryLabels[selectedTopCategory as keyof typeof categoryLabels] || '';
+  };
+
   return (
     <div className="flex w-full min-h-[800px] bg-[#171212] max-md:flex-col">
       <Sidebar 
         onCategorySelect={handleSidebarCategorySelect}
         selectedCategory={selectedCategory}
+        movies={getCurrentMovies()}
+        selectedMovie={selectedMovie}
+        onMovieSelect={handleMovieSelect}
+        currentCategoryLabel={selectedTopCategory ? getCurrentCategoryLabel() : ''}
       />
       
       <div className="flex h-[800px] flex-col flex-1 max-md:h-auto">
@@ -194,14 +208,6 @@ export const MovieChatbot: React.FC = () => {
         <TopNavigation 
           selectedCategory={selectedTopCategory}
           onCategorySelect={handleTopCategorySelect}
-        />
-        
-        <MovieSection
-          category={selectedTopCategory}
-          movies={getCurrentMovies()}
-          selectedMovie={selectedMovie}
-          onMovieSelect={handleMovieSelect}
-          isVisible={showMovieSection}
         />
         
         <ChatArea messages={messages} />
