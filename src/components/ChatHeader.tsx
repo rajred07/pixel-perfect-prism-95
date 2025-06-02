@@ -1,11 +1,12 @@
+
 import React from 'react';
 
 interface ChatHeaderProps {
-  selectedMovie?: string;
+  selectedMovie?: string | null;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
-  selectedMovie = "The Secret Garden"
+  selectedMovie
 }) => {
   const sunIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="flex-1">
     <g clip-path="url(#clip0_2507_622)">
@@ -30,61 +31,45 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   </svg>`;
 
   return (
-    <header className="flex h-[760px] flex-col flex-1 max-md:h-auto">
-      <div className="flex justify-between items-center border px-10 py-3 border-[#E5E8EB] max-md:px-6 max-md:py-3 max-sm:px-4 max-sm:py-3">
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col" />
-          <h1 className="text-white text-lg font-bold leading-[23px] h-[23px]">
-            Movie Chatbot
-          </h1>
-        </div>
-        <div className="flex justify-end items-start gap-8 flex-1 max-md:gap-4">
-          <nav className="flex h-10 items-center gap-9 max-md:gap-6 max-sm:hidden">
-            <button className="text-white text-sm font-medium leading-[21px] hover:text-gray-300 transition-colors">
-              Bollywood 🎬
-            </button>
-            <button className="text-white text-sm font-medium leading-[21px] hover:text-gray-300 transition-colors">
-              Hollywood 🎬
-            </button>
-            <button className="text-white text-sm font-medium leading-[21px] hover:text-gray-300 transition-colors">
-              Anime/Manga 🎬
-            </button>
-            <button className="text-white text-sm font-medium leading-[21px] hover:text-gray-300 transition-colors">
-              Dramas 📺
-            </button>
-          </nav>
-          <div className="flex items-start gap-2">
-            <button 
-              className="flex h-10 justify-center items-center gap-2 bg-[#362B2B] px-2.5 py-0 rounded-xl hover:bg-[#362B2B]/80 transition-colors"
-              aria-label="Toggle light mode"
-            >
-              <div className="flex flex-col items-center flex-1">
-                <div dangerouslySetInnerHTML={{ __html: sunIcon }} />
-              </div>
-            </button>
-            <button 
-              className="flex h-10 justify-center items-center gap-2 bg-[#362B2B] px-2.5 py-0 rounded-xl hover:bg-[#362B2B]/80 transition-colors"
-              aria-label="Toggle dark mode"
-            >
-              <div className="flex flex-col items-center flex-1">
-                <div dangerouslySetInnerHTML={{ __html: moonIcon }} />
-              </div>
-            </button>
-          </div>
-          <img
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
-            alt="User profile"
-            className="w-[40px] h-[40px] rounded-[20px]"
-          />
-        </div>
+    <div className="flex justify-between items-center border px-10 py-3 border-[#E5E8EB] max-md:px-6 max-md:py-3 max-sm:px-4 max-sm:py-3">
+      <div className="flex items-center gap-4">
+        <div className="flex flex-col" />
+        <h1 className="text-white text-lg font-bold leading-[23px] h-[23px]">
+          Movie Chatbot
+        </h1>
       </div>
-      <div className="flex items-start gap-3 flex-wrap pl-3 pr-4 py-3 max-sm:p-2">
-        <div className="flex h-8 justify-center items-center gap-2 bg-[#362B2B] px-4 py-0 rounded-xl max-sm:px-3 max-sm:py-0">
-          <div className="text-white text-sm font-medium leading-[21px] flex-1 max-sm:text-xs">
-            Currently Selected Movie: {selectedMovie}
+      <div className="flex justify-end items-center gap-8 flex-1 max-md:gap-4">
+        {selectedMovie && (
+          <div className="flex h-8 justify-center items-center gap-2 bg-[#362B2B] px-4 py-0 rounded-xl max-sm:px-3 max-sm:py-0">
+            <span className="text-white text-sm font-medium leading-[21px] flex-1 max-sm:text-xs">
+              🎬 Currently Selected Movie: {selectedMovie}
+            </span>
           </div>
+        )}
+        <div className="flex items-center gap-2">
+          <button 
+            className="flex h-10 justify-center items-center gap-2 bg-[#362B2B] px-2.5 py-0 rounded-xl hover:bg-[#362B2B]/80 transition-colors"
+            aria-label="Toggle light mode"
+          >
+            <div className="flex flex-col items-center flex-1">
+              <div dangerouslySetInnerHTML={{ __html: sunIcon }} />
+            </div>
+          </button>
+          <button 
+            className="flex h-10 justify-center items-center gap-2 bg-[#362B2B] px-2.5 py-0 rounded-xl hover:bg-[#362B2B]/80 transition-colors"
+            aria-label="Toggle dark mode"
+          >
+            <div className="flex flex-col items-center flex-1">
+              <div dangerouslySetInnerHTML={{ __html: moonIcon }} />
+            </div>
+          </button>
         </div>
+        <img
+          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
+          alt="User profile"
+          className="w-[40px] h-[40px] rounded-[20px]"
+        />
       </div>
-    </header>
+    </div>
   );
 };
