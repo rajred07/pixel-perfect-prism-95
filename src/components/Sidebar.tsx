@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavigationItem } from './NavigationItem';
 
@@ -107,7 +108,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 key={item.id}
                 icon={item.icon}
                 label={item.label}
-                isActive={item.id === 'new-chat'}
+                isActive={item.id === selectedCategory}
                 onClick={() => onCategorySelect?.(item.id)}
               />
             ))}
@@ -117,6 +118,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <NavigationItem
             icon={settingsIcon}
             label="Settings"
+            isActive={selectedCategory === 'settings'}
             onClick={() => onCategorySelect?.('settings')}
           />
         </div>
