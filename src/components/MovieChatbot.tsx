@@ -146,11 +146,15 @@ export const MovieChatbot: React.FC = () => {
         setMessages(current => {
           const finalMessages = [...current, botResponse];
           
-          // Save to Firebase if user is authenticated
-          if (selectedMovie) {
-            saveChatSession(finalMessages, `Chat about ${selectedMovie}`);
-          } else if (selectedTopCategory) {
-            saveChatSession(finalMessages, `${selectedTopCategory} Chat`);
+          // Save to Firebase if user is authenticated and has more than just welcome message
+          if (finalMessages.length > 2) {
+            if (selectedMovie) {
+              saveChatSession(finalMessages, `Chat about ${selectedMovie}`);
+            } else if (selectedTopCategory) {
+              saveChatSession(finalMessages, `${selectedTopCategory.charAt(0).toUpperCase() + selectedTopCategory.slice(1)} Chat`);
+            } else {
+              saveChatSession(finalMessages, `General Chat - ${new Date().toLocaleDateString()}`);
+            }
           }
           
           return finalMessages;
@@ -258,8 +262,8 @@ export const MovieChatbot: React.FC = () => {
         selectedMovie={selectedMovie}
         onMovieSelect={handleMovieSelect}
         currentCategoryLabel={selectedTopCategory ? getCurrentCategoryLabel() : ''}
-        loading={selectedTopCategory === 'anime' ? loading : false}
-        error={selectedTopCategory === 'anime' ? error : null}
+        loading={['bollywood', 'hollywood', 'anime', 'dramas'].includes(selectedTopCategory) ? loading : false}
+        error={['bollywood', 'hollywood', 'anime', 'dramas'].includes(selectedTopCategory) ? error : null}
       />
       
       <div className="flex h-[800px] flex-col flex-1 max-md:h-auto">
@@ -268,10 +272,13 @@ export const MovieChatbot: React.FC = () => {
           onSettingsClick={handleSettingsClick}
         />
         
-        <TopNavigation 
-          selectedCategory={selectedTopCategory}
-          onCategorySelect={handleTopCategorySelect}
-        />
+        {/* Hide TopNavigation when viewing chat history */}
+        {selectedCategory !== 'chat-history' && (
+          <TopNavigation 
+            selectedCategory={selectedTopCategory}
+            onCategorySelect={handleTopCategorySelect}
+          />
+        )}
         
         <div className="flex-1 overflow-hidden">
           {renderMainContent()}

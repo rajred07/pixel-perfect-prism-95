@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useChatHistory } from '@/hooks/useChatHistory';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ChatMessage {
   id: string;
@@ -19,7 +20,17 @@ interface ChatSession {
 }
 
 export const ChatHistoryView: React.FC = () => {
+  const { user } = useAuth();
   const { chatHistory, loading, error } = useChatHistory();
+
+  if (!user || user.uid === 'demo-user-123') {
+    return (
+      <div className="p-8 text-center text-gray-600 dark:text-gray-400">
+        <p className="text-lg mb-2">Please sign in to view your chat history</p>
+        <p className="text-sm">Your conversations will be saved and accessible here once you're logged in.</p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

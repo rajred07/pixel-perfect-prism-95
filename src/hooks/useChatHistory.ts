@@ -27,7 +27,10 @@ export const useChatHistory = () => {
   const [error, setError] = useState<string | null>(null);
 
   const saveChatSession = async (messages: ChatMessage[], title: string) => {
-    if (!user || user.uid === 'demo-user-123') return; // Don't save for demo user
+    if (!user || user.uid === 'demo-user-123' || !user.uid) {
+      console.log('Not saving chat for demo user or undefined user');
+      return;
+    }
     
     try {
       const chatSession = {
@@ -40,6 +43,9 @@ export const useChatHistory = () => {
 
       await addDoc(collection(db, 'chat_sessions'), chatSession);
       console.log('Chat session saved successfully');
+      
+      // Reload chat history after saving
+      loadChatHistory();
     } catch (err: any) {
       console.error('Error saving chat session:', err);
       setError(err.message);
@@ -47,8 +53,9 @@ export const useChatHistory = () => {
   };
 
   const loadChatHistory = async () => {
-    if (!user || user.uid === 'demo-user-123') {
+    if (!user || user.uid === 'demo-user-123' || !user.uid) {
       setChatHistory([]);
+      setLoading(false);
       return;
     }
 
@@ -82,8 +89,11 @@ export const useChatHistory = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && user.uid && user.uid !== 'demo-user-123') {
       loadChatHistory();
+    } else {
+      setChatHistory([]);
+      setLoading(false);
     }
   }, [user]);
 
