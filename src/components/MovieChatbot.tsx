@@ -190,6 +190,20 @@ export const MovieChatbot: React.FC = () => {
     setMessages(prev => [...prev, movieMessage]);
   };
 
+  const handleSettingsClick = () => {
+    setSelectedCategory('settings');
+    setSelectedTopCategory('');
+    setSelectedMovie(null);
+    
+    const welcomeMessage = getWelcomeMessage('settings');
+    setMessages([{
+      id: Date.now().toString(),
+      message: welcomeMessage,
+      sender: 'bot',
+      timestamp: new Date().toISOString()
+    }]);
+  };
+
   const getCurrentMovies = (): Movie[] => {
     // For anime category, use Firebase data
     if (selectedTopCategory === 'anime') {
@@ -204,7 +218,7 @@ export const MovieChatbot: React.FC = () => {
   };
 
   return (
-    <div className="flex w-full min-h-[800px] bg-[#171212] max-md:flex-col">
+    <div className="flex w-full min-h-[800px] bg-[#171212] dark:bg-[#171212] max-md:flex-col">
       <Sidebar 
         onCategorySelect={handleSidebarCategorySelect}
         selectedCategory={selectedCategory}
@@ -217,7 +231,10 @@ export const MovieChatbot: React.FC = () => {
       />
       
       <div className="flex h-[800px] flex-col flex-1 max-md:h-auto">
-        <ChatHeader selectedMovie={selectedMovie} />
+        <ChatHeader 
+          selectedMovie={selectedMovie}
+          onSettingsClick={handleSettingsClick}
+        />
         
         <TopNavigation 
           selectedCategory={selectedTopCategory}

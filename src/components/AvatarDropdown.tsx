@@ -11,13 +11,29 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-export const AvatarDropdown: React.FC = () => {
+interface AvatarDropdownProps {
+  onSettingsClick?: () => void;
+}
+
+export const AvatarDropdown: React.FC<AvatarDropdownProps> = ({ onSettingsClick }) => {
   const { user, signOut } = useAuth();
 
   if (!user) return null;
 
   const handleSignOut = async () => {
     await signOut();
+  };
+
+  const handleSwitchAccount = () => {
+    // Clear current user and redirect to login
+    localStorage.removeItem('demo-user');
+    window.location.reload();
+  };
+
+  const handleSettings = () => {
+    if (onSettingsClick) {
+      onSettingsClick();
+    }
   };
 
   return (
@@ -40,7 +56,10 @@ export const AvatarDropdown: React.FC = () => {
           {user.email}
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-gray-600" />
-        <DropdownMenuItem className="text-white hover:bg-[#4A3F3F] cursor-pointer">
+        <DropdownMenuItem 
+          className="text-white hover:bg-[#4A3F3F] cursor-pointer"
+          onClick={handleSwitchAccount}
+        >
           🔁 Switch Account
         </DropdownMenuItem>
         <DropdownMenuItem 
@@ -49,7 +68,10 @@ export const AvatarDropdown: React.FC = () => {
         >
           🔓 Sign Out
         </DropdownMenuItem>
-        <DropdownMenuItem className="text-white hover:bg-[#4A3F3F] cursor-pointer">
+        <DropdownMenuItem 
+          className="text-white hover:bg-[#4A3F3F] cursor-pointer"
+          onClick={handleSettings}
+        >
           ⚙️ Settings
         </DropdownMenuItem>
       </DropdownMenuContent>
