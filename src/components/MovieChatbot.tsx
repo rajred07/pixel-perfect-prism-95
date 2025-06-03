@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { ChatHeader } from './ChatHeader';
 import { ChatArea } from './ChatArea';
 import { MessageInput } from './MessageInput';
 import { TopNavigation } from './TopNavigation';
+import { useMovies } from '../hooks/useMovies';
 
 interface Message {
   id: string;
@@ -18,6 +18,10 @@ interface Movie {
   title: string;
   year?: string;
   poster?: string;
+  japaneseTitle?: string;
+  episodes?: string;
+  genres?: string;
+  popularity?: string;
 }
 
 const movieData = {
@@ -91,6 +95,9 @@ export const MovieChatbot: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('new-chat');
   const [selectedTopCategory, setSelectedTopCategory] = useState<string>('');
   const [selectedMovie, setSelectedMovie] = useState<string | null>(null);
+
+  // Use the Firebase hook for anime category
+  const { movies: firebaseMovies, loading, error } = useMovies(selectedTopCategory);
 
   const getWelcomeMessage = (category: string): string => {
     switch (category) {
@@ -184,6 +191,11 @@ export const MovieChatbot: React.FC = () => {
   };
 
   const getCurrentMovies = (): Movie[] => {
+    // For anime category, use Firebase data
+    if (selectedTopCategory === 'anime') {
+      return firebaseMovies;
+    }
+    // For other categories, use static data
     return movieData[selectedTopCategory as keyof typeof movieData] || [];
   };
 
@@ -200,6 +212,8 @@ export const MovieChatbot: React.FC = () => {
         selectedMovie={selectedMovie}
         onMovieSelect={handleMovieSelect}
         currentCategoryLabel={selectedTopCategory ? getCurrentCategoryLabel() : ''}
+        loading={selectedTopCategory === 'anime' ? loading : false}
+        error={selectedTopCategory === 'anime' ? error : null}
       />
       
       <div className="flex h-[800px] flex-col flex-1 max-md:h-auto">

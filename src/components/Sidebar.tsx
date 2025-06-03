@@ -5,7 +5,11 @@ import { NavigationItem } from './NavigationItem';
 interface Movie {
   id: string;
   title: string;
+  japaneseTitle?: string;
   year?: string;
+  episodes?: string;
+  genres?: string;
+  popularity?: string;
 }
 
 interface SidebarProps {
@@ -15,6 +19,8 @@ interface SidebarProps {
   selectedMovie?: string | null;
   onMovieSelect?: (movie: Movie) => void;
   currentCategoryLabel?: string;
+  loading?: boolean;
+  error?: string | null;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -23,7 +29,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   movies = [],
   selectedMovie,
   onMovieSelect,
-  currentCategoryLabel
+  currentCategoryLabel,
+  loading = false,
+  error = null,
 }) => {
   const navigationItems = [
     {
@@ -67,6 +75,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </defs>
   </svg>`;
 
+  // Helper function to show movie count
+  const getMovieCountText = () => {
+    if (loading) return "Loading...";
+    if (error) return "Error loading";
+    return `${movies.length} ${movies.length === 1 ? "movie" : "movies"}`;
+  };
+
   return (
     <nav className="flex flex-col w-[319px] max-md:w-full max-md:h-auto max-sm:hidden">
       <div className="flex min-h-[700px] flex-col bg-[#171212] p-4 max-md:min-h-[auto]">
@@ -87,29 +102,61 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           
           {/* Dynamic Movie List */}
-          {currentCategoryLabel && movies.length > 0 && (
+          {currentCategoryLabel && (
             <div className="flex flex-col gap-2 mt-4">
-              <div className="text-gray-400 text-sm font-medium leading-5 px-3">
-                {currentCategoryLabel} Movies
+              <div className="text-gray-400 text-sm font-medium leading-5 px-3 flex items-center justify-between">
+                <span>{currentCategoryLabel} Movies</span>
+                <span className="text-xs">{getMovieCountText()}</span>
               </div>
-              <div className="flex flex-col gap-1 max-h-[300px] overflow-y-auto">
-                {movies.map((movie) => (
-                  <button
-                    key={movie.id}
-                    onClick={() => onMovieSelect?.(movie)}
-                    className={`flex flex-col items-start gap-1 px-3 py-2 rounded-xl w-full text-left transition-colors ${
-                      selectedMovie === movie.title
-                        ? 'bg-[#362B2B] text-white'
-                        : 'text-gray-300 hover:bg-[#362B2B]/50 hover:text-white'
-                    }`}
-                  >
-                    <div className="text-sm font-medium">{movie.title}</div>
-                    {movie.year && (
-                      <div className="text-xs text-gray-400">{movie.year}</div>
-                    )}
-                  </button>
-                ))}
-              </div>
+
+              {loading && (
+                <div className="flex items-center justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                </div>
+              )}
+
+              {error && (
+                <div className="px-3 py-2 text-red-400 text-sm">
+                  Failed to load movies. Please try again.
+                </div>
+              )}
+
+              {!loading && !error && movies.length === 0 && (
+                <div className="px-3 py-2 text-gray-500 text-sm">
+                  No movies found in this category.
+                </div>
+              )}
+
+              {!loading && !error && movies.length > 0 && (
+                <div className="flex flex-col gap-1 max-h-[300px] overflow-y-auto">
+                  {movies.map((movie) => (
+                    <button
+                      key={movie.id}
+                      onClick={() => onMovieSelect?.(movie)}
+                      className={`flex flex-col items-start gap-1 px-3 py-2 rounded-xl w-full text-left transition-colors ${
+                        selectedMovie === movie.title
+                          ? 'bg-[#362B2B] text-white'
+                          : 'text-gray-300 hover:bg-[#362B2B]/50 hover:text-white'
+                      }`}
+                    >
+                      <div className="text-sm font-medium">{movie.title}</div>
+                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                        {movie.year && <span>{movie.year}</span>}
+                        {movie.episodes && movie.year && <span>•</span>}
+                        {movie.episodes && <span>{movie.episodes} eps</span>}
+                        {movie.japaneseTitle && (
+                          <>
+                            {(movie.year || movie.episodes) && <span>•</span>}
+                            <span className="truncate">
+                              {movie.japaneseTitle}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
