@@ -84,9 +84,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <nav className="flex flex-col w-[319px] max-md:w-full max-md:h-auto max-sm:hidden">
-      <div className="flex min-h-[700px] flex-col bg-[#171212] p-4 max-md:min-h-[auto]">
+      <div className="flex min-h-[700px] flex-col bg-white dark:bg-[#171212] p-4 max-md:min-h-[auto]">
         <div className="flex flex-col gap-4 flex-1">
-          <div className="text-white text-base font-medium leading-6">
+          <div className="text-black dark:text-white text-base font-medium leading-6">
             Movie Chatbot
           </div>
           <div className="flex flex-col gap-2">
@@ -100,29 +100,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
               />
             ))}
           </div>
-          
+
           {/* Dynamic Movie List */}
           {currentCategoryLabel && (
             <div className="flex flex-col gap-2 mt-4">
-              <div className="text-gray-400 text-sm font-medium leading-5 px-3 flex items-center justify-between">
+              <div className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-5 px-3 flex items-center justify-between">
                 <span>{currentCategoryLabel} Movies</span>
                 <span className="text-xs">{getMovieCountText()}</span>
               </div>
 
               {loading && (
                 <div className="flex items-center justify-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-black dark:border-white"></div>
                 </div>
               )}
 
               {error && (
-                <div className="px-3 py-2 text-red-400 text-sm">
+                <div className="px-3 py-2 text-red-500 dark:text-red-400 text-sm">
                   Failed to load movies. Please try again.
                 </div>
               )}
 
               {!loading && !error && movies.length === 0 && (
-                <div className="px-3 py-2 text-gray-500 text-sm">
+                <div className="px-3 py-2 text-gray-500 dark:text-gray-500 text-sm">
                   No movies found in this category.
                 </div>
               )}
@@ -135,12 +135,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       onClick={() => onMovieSelect?.(movie)}
                       className={`flex flex-col items-start gap-1 px-3 py-2 rounded-xl w-full text-left transition-colors ${
                         selectedMovie === movie.title
-                          ? 'bg-[#362B2B] text-white'
-                          : 'text-gray-300 hover:bg-[#362B2B]/50 hover:text-white'
+                          ? 'bg-gray-200 dark:bg-[#362B2B] text-black dark:text-white'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#362B2B]/50 hover:text-black dark:hover:text-white'
                       }`}
                     >
                       <div className="text-sm font-medium">{movie.title}</div>
-                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                         {movie.year && <span>{movie.year}</span>}
                         {movie.episodes && movie.year && <span>•</span>}
                         {movie.episodes && <span>{movie.episodes} eps</span>}
@@ -160,7 +160,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           )}
         </div>
-        
+
         <div className="flex flex-col gap-1 mt-4">
           <NavigationItem
             icon={settingsIcon}

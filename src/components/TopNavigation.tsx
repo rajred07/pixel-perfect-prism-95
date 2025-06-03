@@ -18,15 +18,15 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   ];
 
   return (
-    <div className="flex items-center gap-6 px-6 py-4 border-b border-[#362B2B] max-md:gap-4 max-sm:gap-2 max-sm:px-4">
+    <div className="flex items-center gap-6 px-6 py-4 border-b border-gray-300 dark:border-[#362B2B] bg-white dark:bg-[#171212] max-md:gap-4 max-sm:gap-2 max-sm:px-4">
       {categories.map((category) => (
         <button
           key={category.id}
           onClick={() => onCategorySelect(category.id)}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             selectedCategory === category.id
-              ? 'bg-[#362B2B] text-white'
-              : 'text-gray-400 hover:text-white hover:bg-[#362B2B]/50'
+              ? 'bg-gray-200 dark:bg-[#362B2B] text-black dark:text-white'
+              : 'text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#362B2B]/50'
           }`}
         >
           <span>{category.icon}</span>

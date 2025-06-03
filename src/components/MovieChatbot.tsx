@@ -5,6 +5,7 @@ import { ChatArea } from './ChatArea';
 import { MessageInput } from './MessageInput';
 import { TopNavigation } from './TopNavigation';
 import { useMovies } from '../hooks/useMovies';
+import { useChatHistory } from '../hooks/useChatHistory';
 
 interface Message {
   id: string;
@@ -96,7 +97,10 @@ export const MovieChatbot: React.FC = () => {
   const [selectedTopCategory, setSelectedTopCategory] = useState<string>('');
   const [selectedMovie, setSelectedMovie] = useState<string | null>(null);
 
-  // Use the Firebase hook for anime category
+  // Add chat history hook
+  const { chatHistory, saveChatSession } = useChatHistory();
+
+  // Use the Firebase hook for all categories now
   const { movies: firebaseMovies, loading, error } = useMovies(selectedTopCategory);
 
   const getWelcomeMessage = (category: string): string => {
@@ -126,26 +130,42 @@ export const MovieChatbot: React.FC = () => {
       timestamp: new Date().toISOString()
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    setMessages(prev => {
+      const updatedMessages = [...prev, newMessage];
+      
+      // Save chat session when user sends a message (with bot response)
+      setTimeout(() => {
+        const botResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          message: getBotResponse(message),
+          sender: 'bot',
+          timestamp: new Date().toISOString()
+        };
+        
+        setMessages(current => {
+          const finalMessages = [...current, botResponse];
+          
+          // Save to Firebase if user is authenticated
+          if (selectedMovie) {
+            saveChatSession(finalMessages, `Chat about ${selectedMovie}`);
+          } else if (selectedTopCategory) {
+            saveChatSession(finalMessages, `${selectedTopCategory} Chat`);
+          }
+          
+          return finalMessages;
+        });
+      }, 1000);
+      
+      return updatedMessages;
+    });
+  };
 
-    // Simulate bot response with movie context
-    setTimeout(() => {
-      let response = `Thanks for asking about "${message}". I'd be happy to help you with information about movies!`;
-      
-      if (selectedMovie) {
-        response = `Thanks for asking about "${message}". Since we're discussing "${selectedMovie}", I can provide specific information about this ${selectedTopCategory} title. How can I help you learn more about it?`;
-      } else {
-        response = `Thanks for asking about "${message}". Please select a movie from the sidebar first so I can provide specific information about it.`;
-      }
-      
-      const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        message: response,
-        sender: 'bot',
-        timestamp: new Date().toISOString()
-      };
-      setMessages(prev => [...prev, botResponse]);
-    }, 1000);
+  const getBotResponse = (userMessage: string): string => {
+    if (selectedMovie) {
+      return `Thanks for asking about "${userMessage}". Since we're discussing "${selectedMovie}", I can provide specific information about this ${selectedTopCategory} title. How can I help you learn more about it?`;
+    } else {
+      return `Thanks for asking about "${userMessage}". Please select a movie from the sidebar first so I can provide specific information about it.`;
+    }
   };
 
   const handleSidebarCategorySelect = (category: string) => {
@@ -205,12 +225,15 @@ export const MovieChatbot: React.FC = () => {
   };
 
   const getCurrentMovies = (): Movie[] => {
-    // For anime category, use Firebase data
-    if (selectedTopCategory === 'anime') {
-      return firebaseMovies;
+    // For all categories, try Firebase first, fallback to static data
+    if (selectedTopCategory && ['bollywood', 'hollywood', 'anime', 'dramas'].includes(selectedTopCategory)) {
+      if (firebaseMovies.length > 0) {
+        return firebaseMovies;
+      }
+      // Fallback to static data if Firebase is empty
+      return movieData[selectedTopCategory as keyof typeof movieData] || [];
     }
-    // For other categories, use static data
-    return movieData[selectedTopCategory as keyof typeof movieData] || [];
+    return [];
   };
 
   const getCurrentCategoryLabel = (): string => {
@@ -218,7 +241,7 @@ export const MovieChatbot: React.FC = () => {
   };
 
   return (
-    <div className="flex w-full min-h-[800px] bg-[#171212] dark:bg-[#171212] max-md:flex-col">
+    <div className="flex w-full min-h-[800px] bg-white dark:bg-[#171212] max-md:flex-col">
       <Sidebar 
         onCategorySelect={handleSidebarCategorySelect}
         selectedCategory={selectedCategory}

@@ -19,8 +19,8 @@ export const useMovies = (category: string) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only fetch for anime category, ignore others for now
-    if (category !== "anime") {
+    // Only fetch for specific categories that use Firebase
+    if (!['anime', 'bollywood', 'hollywood', 'dramas'].includes(category)) {
       setMovies([]);
       return;
     }
@@ -30,96 +30,56 @@ export const useMovies = (category: string) => {
       setError(null);
 
       try {
-        // Fetch from json_data collection
-        const moviesRef = collection(db, "json_data");
+        // Map categories to Firebase collections
+        const collectionMap: { [key: string]: string } = {
+          'anime': 'json_data',
+          'bollywood': 'bollywood_movies',
+          'hollywood': 'hollywood_movies',
+          'dramas': 'drama_series'
+        };
 
-        // Create query to get all documents
+        const collectionName = collectionMap[category];
+        const moviesRef = collection(db, collectionName);
         const q = query(moviesRef);
-
         const querySnapshot = await getDocs(q);
         const moviesData: Movie[] = [];
 
         querySnapshot.forEach((doc) => {
           const data = doc.data();
 
-          // Extract the English Title and other relevant fields
-          if (data["English Title"]) {
-            moviesData.push({
-              id: doc.id,
-              title: data["English Title"],
-              japaneseTitle: data["Japanese Title"] || "",
-              year: data["Premiered"] || data["Aired"] || "",
-              episodes: data["Episodes"] || "",
-              genres: data["Genres"] || "",
-              popularity: data["Popularity"] || "",
-              // Add any other fields you want to use
-            });
+          // Handle different data structures based on category
+          if (category === 'anime') {
+            if (data["English Title"]) {
+              moviesData.push({
+                id: doc.id,
+                title: data["English Title"],
+                japaneseTitle: data["Japanese Title"] || "",
+                year: extractYear(data["Premiered"] || data["Aired"] || ""),
+                episodes: data["Episodes"] || "",
+                genres: data["Genres"] || "",
+                popularity: data["Popularity"] || "",
+              });
+            }
+          } else {
+            // For other categories, assume standard structure
+            if (data.title || data.name) {
+              moviesData.push({
+                id: doc.id,
+                title: data.title || data.name,
+                year: data.year || extractYear(data.release_date || data.aired || ""),
+                episodes: data.episodes || data.seasons || "",
+                genres: data.genres || "",
+                popularity: data.rating || data.popularity || "",
+              });
+            }
           }
         });
 
-        // Sort alphabetically by English title
+        // Sort alphabetically by title
         moviesData.sort((a, b) => a.title.localeCompare(b.title));
-
         setMovies(moviesData);
       } catch (err: any) {
-        console.error("Error fetching movies:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMovies();
-  }, [category]);
-
-  return { movies, loading, error };
-};
-
-// Alternative version if you want to filter by specific criteria
-export const useAnimeMovies = (category: string) => {
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (category !== "anime") {
-      setMovies([]);
-      return;
-    }
-
-    const fetchMovies = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const moviesRef = collection(db, "json_data");
-        const querySnapshot = await getDocs(moviesRef);
-        const moviesData: Movie[] = [];
-
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-
-          // Only include documents that have an English Title
-          if (data["English Title"] && data["English Title"].trim() !== "") {
-            moviesData.push({
-              id: doc.id,
-              title: data["English Title"],
-              japaneseTitle: data["Japanese Title"] || "",
-              // Extract year from different possible fields
-              year: extractYear(data["Premiered"] || data["Aired"] || ""),
-              episodes: data["Episodes"] || "N/A",
-              genres: data["Genres"] || "N/A",
-              popularity: data["Popularity"] || "",
-            });
-          }
-        });
-
-        // Sort by title
-        moviesData.sort((a, b) => a.title.localeCompare(b.title));
-
-        setMovies(moviesData);
-      } catch (err: any) {
-        console.error("Error fetching anime:", err);
+        console.error(`Error fetching ${category} movies:`, err);
         setError(err.message);
       } finally {
         setLoading(false);
