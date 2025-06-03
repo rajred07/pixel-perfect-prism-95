@@ -4,6 +4,7 @@ import { ChatHeader } from './ChatHeader';
 import { ChatArea } from './ChatArea';
 import { MessageInput } from './MessageInput';
 import { TopNavigation } from './TopNavigation';
+import { ChatHistoryView } from './ChatHistoryView';
 import { useMovies } from '../hooks/useMovies';
 import { useChatHistory } from '../hooks/useChatHistory';
 
@@ -240,6 +241,14 @@ export const MovieChatbot: React.FC = () => {
     return categoryLabels[selectedTopCategory as keyof typeof categoryLabels] || '';
   };
 
+  const renderMainContent = () => {
+    if (selectedCategory === 'chat-history') {
+      return <ChatHistoryView />;
+    }
+    
+    return <ChatArea messages={messages} />;
+  };
+
   return (
     <div className="flex w-full min-h-[800px] bg-white dark:bg-[#171212] max-md:flex-col">
       <Sidebar 
@@ -264,12 +273,16 @@ export const MovieChatbot: React.FC = () => {
           onCategorySelect={handleTopCategorySelect}
         />
         
-        <ChatArea messages={messages} />
+        <div className="flex-1 overflow-hidden">
+          {renderMainContent()}
+        </div>
         
-        <MessageInput 
-          onSendMessage={handleSendMessage}
-          placeholder="Type your message here..."
-        />
+        {selectedCategory !== 'chat-history' && (
+          <MessageInput 
+            onSendMessage={handleSendMessage}
+            placeholder="Type your message here..."
+          />
+        )}
       </div>
     </div>
   );
