@@ -262,7 +262,7 @@ export const MovieChatbot: React.FC = () => {
   };
 
   return (
-    <div className="flex w-full min-h-[800px] bg-white dark:bg-[#171212] max-md:flex-col">
+    <div className="flex w-full h-screen bg-white dark:bg-[#171212] max-w-7xl mx-auto">
       <Sidebar 
         onCategorySelect={handleSidebarCategorySelect}
         selectedCategory={selectedCategory}
@@ -274,7 +274,7 @@ export const MovieChatbot: React.FC = () => {
         error={['bollywood', 'hollywood', 'anime', 'dramas', 'kmovies', 'manga'].includes(selectedTopCategory) ? error : null}
       />
       
-      <div className="flex h-[800px] flex-col flex-1 max-md:h-auto">
+      <div className="flex h-full flex-col flex-1 min-w-0">
         <ChatHeader 
           selectedMovie={selectedMovie}
           onSettingsClick={handleSettingsClick}
@@ -288,7 +288,7 @@ export const MovieChatbot: React.FC = () => {
           />
         )}
         
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden min-h-0">
           {renderMainContent()}
         </div>
         

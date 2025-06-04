@@ -1,5 +1,7 @@
-import React from 'react';
+
+import React, { useEffect, useRef } from 'react';
 import { ChatMessage } from './ChatMessage';
+import { ScrollArea } from './ui/scroll-area';
 
 interface Message {
   id: string;
@@ -13,16 +15,29 @@ interface ChatAreaProps {
 }
 
 export const ChatArea: React.FC<ChatAreaProps> = ({ messages }) => {
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
+  }, [messages]);
+
   return (
-    <main className="flex-1 overflow-y-auto">
-      {messages.map((msg) => (
-        <ChatMessage
-          key={msg.id}
-          message={msg.message}
-          sender={msg.sender}
-          timestamp={msg.timestamp}
-        />
-      ))}
-    </main>
+    <ScrollArea className="flex-1 h-full" ref={scrollAreaRef}>
+      <div className="flex flex-col">
+        {messages.map((msg) => (
+          <ChatMessage
+            key={msg.id}
+            message={msg.message}
+            sender={msg.sender}
+            timestamp={msg.timestamp}
+          />
+        ))}
+      </div>
+    </ScrollArea>
   );
 };
