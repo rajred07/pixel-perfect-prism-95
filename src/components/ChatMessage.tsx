@@ -1,4 +1,6 @@
+
 import React from 'react';
+import { SavyAvatar } from './SavyAvatar';
 
 interface ChatMessageProps {
   message: string;
@@ -16,23 +18,17 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const isBot = sender === 'bot';
   
   return (
-    <div className={`flex items-end gap-3 p-4 max-sm:p-3 ${isBot ? '' : 'justify-end'}`}>
-      {isBot && (
-        <img
-          src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=40&h=40&fit=crop&crop=face"
-          alt="Bot avatar"
-          className="w-[40px] h-[40px] rounded-[20px]"
-        />
-      )}
+    <div className={`flex items-end gap-3 p-4 max-sm:p-3 font-poppins ${isBot ? '' : 'justify-end'}`}>
+      {isBot && <SavyAvatar />}
       
       <div className={`flex flex-col gap-1 flex-1 ${isBot ? '' : 'items-end'}`}>
-        <div className={`text-[#B5A3A3] text-[13px] font-normal leading-5 max-w-[360px] max-sm:max-w-full ${isBot ? '' : 'text-right'}`}>
-          {senderName || (isBot ? 'Movie Chatbot' : 'User')}
+        <div className={`text-gray-500 dark:text-gray-400 text-xs font-medium max-w-[360px] max-sm:max-w-full ${isBot ? '' : 'text-right'}`}>
+          {senderName || (isBot ? 'Savy' : 'You')}
         </div>
-        <div className={`text-base font-normal leading-6 max-w-[360px] px-4 py-3 rounded-xl max-sm:text-sm max-sm:max-w-full max-sm:px-3 max-sm:py-2.5 ${
+        <div className={`text-sm font-normal leading-relaxed max-w-[360px] px-4 py-3 max-sm:text-sm max-sm:max-w-full max-sm:px-3 max-sm:py-2.5 ${
           isBot 
-            ? 'text-white bg-[#362B2B]' 
-            : 'text-[#171212] bg-[#E8B5B8]'
+            ? 'text-gray-800 dark:text-white bg-gradient-to-br from-purple-50/80 via-blue-50/80 to-purple-50/80 dark:from-purple-900/20 dark:via-blue-900/20 dark:to-purple-900/20 backdrop-blur-sm border border-purple-200/50 dark:border-purple-700/50 rounded-2xl rounded-bl-sm shadow-lg shadow-purple-100/50 dark:shadow-purple-900/20' 
+            : 'text-gray-800 dark:text-white bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-2xl rounded-br-sm shadow-md'
         }`}>
           {message}
         </div>
@@ -42,7 +38,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         <img
           src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
           alt="User avatar"
-          className="w-[40px] h-[40px] rounded-[20px]"
+          className="w-10 h-10 rounded-full border-2 border-gray-200 dark:border-gray-600"
         />
       )}
     </div>
