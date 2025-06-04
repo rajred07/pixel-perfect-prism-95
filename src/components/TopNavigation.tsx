@@ -13,8 +13,10 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   const categories = [
     { id: 'bollywood', label: 'Bollywood', icon: '🎬' },
     { id: 'hollywood', label: 'Hollywood', icon: '🎞️' },
-    { id: 'anime', label: 'Anime/Manga', icon: '🎥' },
-    { id: 'dramas', label: 'Dramas', icon: '📺' }
+    { id: 'anime', label: 'Anime', icon: '🎥' },
+    { id: 'dramas', label: 'K-Drama', icon: '📺' },
+    { id: 'kmovies', label: 'K-Movies', icon: '🎦' },
+    { id: 'manga', label: 'Manga', icon: '📚' }
   ];
 
   return (

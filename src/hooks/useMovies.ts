@@ -10,7 +10,10 @@ interface Movie {
   year?: string;
   episodes?: string;
   genres?: string;
+  genre?: string[];
   popularity?: string;
+  synopsis?: string;
+  score?: string;
 }
 
 export const useMovies = (category: string) => {
@@ -20,7 +23,7 @@ export const useMovies = (category: string) => {
 
   useEffect(() => {
     // Only fetch for specific categories that use Firebase
-    if (!['anime', 'bollywood', 'hollywood', 'dramas'].includes(category)) {
+    if (!['anime', 'bollywood', 'hollywood', 'dramas', 'kmovies', 'manga'].includes(category)) {
       setMovies([]);
       return;
     }
@@ -32,10 +35,12 @@ export const useMovies = (category: string) => {
       try {
         // Map categories to Firebase collections
         const collectionMap: { [key: string]: string } = {
-          'anime': 'json_data',
-          'bollywood': 'bollywood_movies',
-          'hollywood': 'hollywood_movies',
-          'dramas': 'drama_series'
+          'anime': 'Anime',
+          'bollywood': 'Bollywood',
+          'hollywood': 'Hollywood',
+          'dramas': 'KDrama',
+          'kmovies': 'KMovie',
+          'manga': 'Manga'
         };
 
         const collectionName = collectionMap[category];
@@ -61,15 +66,17 @@ export const useMovies = (category: string) => {
               });
             }
           } else {
-            // For other categories, assume standard structure
-            if (data.title || data.name) {
+            // For other categories, use the new structure with title, genre, synopsis, score
+            if (data.title) {
               moviesData.push({
                 id: doc.id,
-                title: data.title || data.name,
+                title: data.title,
                 year: data.year || extractYear(data.release_date || data.aired || ""),
                 episodes: data.episodes || data.seasons || "",
-                genres: data.genres || "",
-                popularity: data.rating || data.popularity || "",
+                genres: Array.isArray(data.genre) ? data.genre.join(', ') : (data.genres || ""),
+                genre: data.genre || [],
+                synopsis: data.synopsis || "",
+                score: data.score || data.rating || data.popularity || "",
               });
             }
           }

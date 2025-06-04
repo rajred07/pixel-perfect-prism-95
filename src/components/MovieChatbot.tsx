@@ -80,8 +80,10 @@ const movieData = {
 const categoryLabels = {
   bollywood: 'Bollywood',
   hollywood: 'Hollywood',
-  anime: 'Anime/Manga',
-  dramas: 'Dramas'
+  anime: 'Anime',
+  dramas: 'K-Drama',
+  kmovies: 'K-Movies',
+  manga: 'Manga'
 };
 
 export const MovieChatbot: React.FC = () => {
@@ -111,9 +113,13 @@ export const MovieChatbot: React.FC = () => {
       case 'hollywood':
         return `Welcome to Hollywood movies! Here are some popular Hollywood films. Please select a movie from the sidebar to get started with your questions.`;
       case 'anime':
-        return `Welcome to Anime/Manga! Here are some popular anime titles. Please select one from the sidebar to get started with your questions.`;
+        return `Welcome to Anime! Here are some popular anime titles. Please select one from the sidebar to get started with your questions.`;
       case 'dramas':
-        return `Welcome to TV Dramas! Here are some popular drama series. Please select one from the sidebar to get started with your questions.`;
+        return `Welcome to K-Drama! Here are some popular Korean drama series. Please select one from the sidebar to get started with your questions.`;
+      case 'kmovies':
+        return `Welcome to K-Movies! Here are some popular Korean films. Please select a movie from the sidebar to get started with your questions.`;
+      case 'manga':
+        return `Welcome to Manga! Here are some popular manga titles. Please select one from the sidebar to get started with your questions.`;
       case 'chat-history':
         return 'Here is your chat history. You can review your previous conversations here.';
       case 'settings':
@@ -231,12 +237,14 @@ export const MovieChatbot: React.FC = () => {
 
   const getCurrentMovies = (): Movie[] => {
     // For all categories, try Firebase first, fallback to static data
-    if (selectedTopCategory && ['bollywood', 'hollywood', 'anime', 'dramas'].includes(selectedTopCategory)) {
+    if (selectedTopCategory && ['bollywood', 'hollywood', 'anime', 'dramas', 'kmovies', 'manga'].includes(selectedTopCategory)) {
       if (firebaseMovies.length > 0) {
         return firebaseMovies;
       }
-      // Fallback to static data if Firebase is empty
-      return movieData[selectedTopCategory as keyof typeof movieData] || [];
+      // Fallback to static data if Firebase is empty (only for existing categories)
+      if (movieData[selectedTopCategory as keyof typeof movieData]) {
+        return movieData[selectedTopCategory as keyof typeof movieData] || [];
+      }
     }
     return [];
   };
@@ -262,8 +270,8 @@ export const MovieChatbot: React.FC = () => {
         selectedMovie={selectedMovie}
         onMovieSelect={handleMovieSelect}
         currentCategoryLabel={selectedTopCategory ? getCurrentCategoryLabel() : ''}
-        loading={['bollywood', 'hollywood', 'anime', 'dramas'].includes(selectedTopCategory) ? loading : false}
-        error={['bollywood', 'hollywood', 'anime', 'dramas'].includes(selectedTopCategory) ? error : null}
+        loading={['bollywood', 'hollywood', 'anime', 'dramas', 'kmovies', 'manga'].includes(selectedTopCategory) ? loading : false}
+        error={['bollywood', 'hollywood', 'anime', 'dramas', 'kmovies', 'manga'].includes(selectedTopCategory) ? error : null}
       />
       
       <div className="flex h-[800px] flex-col flex-1 max-md:h-auto">
