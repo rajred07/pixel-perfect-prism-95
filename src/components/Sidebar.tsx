@@ -9,7 +9,10 @@ interface Movie {
   year?: string;
   episodes?: string;
   genres?: string;
+  genre?: string[];
   popularity?: string;
+  synopsis?: string;
+  score?: string;
 }
 
 interface SidebarProps {
@@ -82,6 +85,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return `${movies.length} ${movies.length === 1 ? "movie" : "movies"}`;
   };
 
+  // Helper function to format genres
+  const formatGenres = (movie: Movie): string => {
+    if (movie.genre && Array.isArray(movie.genre)) {
+      return movie.genre.slice(0, 2).join(', ');
+    }
+    if (movie.genres) {
+      return movie.genres.split(',').slice(0, 2).join(',').trim();
+    }
+    return '';
+  };
+
   return (
     <nav className="flex flex-col w-[319px] max-md:w-full max-md:h-auto max-sm:hidden">
       <div className="flex min-h-[700px] flex-col bg-white dark:bg-[#171212] p-4 max-md:min-h-[auto] border-r border-gray-200 dark:border-[#362B2B]">
@@ -139,18 +153,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           : 'bg-gray-100 text-black dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#362B2B]/50 dark:hover:text-white'
                       }`}
                     >
-                      <div className="text-sm font-medium">{movie.title}</div>
-                      <div className="flex items-center gap-2 text-xs opacity-75">
-                        {movie.year && <span>{movie.year}</span>}
-                        {movie.episodes && movie.year && <span>•</span>}
-                        {movie.episodes && <span>{movie.episodes} eps</span>}
-                        {movie.japaneseTitle && (
-                          <>
-                            {(movie.year || movie.episodes) && <span>•</span>}
-                            <span className="truncate">
-                              {movie.japaneseTitle}
-                            </span>
-                          </>
+                      <div className="text-sm font-medium truncate w-full">{movie.title}</div>
+                      <div className="flex items-center justify-between w-full text-xs opacity-75">
+                        <span className="truncate flex-1 mr-2">{formatGenres(movie)}</span>
+                        {movie.score && (
+                          <span className="bg-yellow-500 text-black px-1.5 py-0.5 rounded text-xs font-medium">
+                            ⭐ {movie.score}
+                          </span>
                         )}
                       </div>
                     </button>
