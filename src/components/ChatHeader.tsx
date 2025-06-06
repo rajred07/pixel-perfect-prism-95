@@ -86,7 +86,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
         {selectedMovie && (
           <div className="flex h-10 justify-center items-center gap-2 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 backdrop-blur-sm px-4 py-2 rounded-xl border border-purple-200/50 dark:border-purple-700/50">
             <span className="text-black dark:text-white text-sm font-medium leading-tight flex-1">
-              🎬 Currently Selected: {selectedMovie}
+              🎬 Current Selected: {selectedMovie}
             </span>
           </div>
         )}
