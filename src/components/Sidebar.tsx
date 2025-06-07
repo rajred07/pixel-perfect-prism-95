@@ -184,7 +184,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           {currentCategoryLabel && (
-            <div className="flex flex-col gap-2 mt-4">
+            <div className="flex flex-col gap-2">
               <div className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-5 px-3">
                 {currentCategoryLabel} Section 
               </div>

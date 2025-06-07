@@ -35,7 +35,7 @@ export const MovieTooltip: React.FC<MovieTooltipProps> = ({
 
   return (
     <div 
-      className="fixed z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl p-4 max-w-xs animate-fade-in pointer-events-none"
+      className="fixed z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl p-4 max-w-xs transition-all duration-300 ease-out opacity-100 transform scale-100 pointer-events-none"
       style={{
         left: position.x + 10,
         top: position.y - 10,
