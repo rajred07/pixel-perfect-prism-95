@@ -1,6 +1,6 @@
-
 import React, { useState, useMemo } from 'react';
 import { NavigationItem } from './NavigationItem';
+import { MovieTooltip } from './MovieTooltip';
 import { Lock, Search } from 'lucide-react';
 
 interface Movie {
@@ -38,6 +38,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   error = null,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [hoveredMovie, setHoveredMovie] = useState<Movie | null>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   // Filter and sort movies based on search term
   const filteredMovies = useMemo(() => {
@@ -124,14 +126,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
     alert('Chat History will be unlocked in MovieSavy Version 2! 🎬✨');
   };
 
+  const handleMouseEnter = (movie: Movie, event: React.MouseEvent) => {
+    setHoveredMovie(movie);
+    setMousePosition({ x: event.clientX, y: event.clientY });
+  };
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    setMousePosition({ x: event.clientX, y: event.clientY });
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredMovie(null);
+  };
+
   return (
-    <nav className="flex flex-col w-[319px] max-md:w-full max-md:h-auto max-sm:hidden font-poppins">
-      <div className="flex min-h-[700px] flex-col bg-white dark:bg-[#171212] p-4 max-md:min-h-[auto] border-r border-gray-200 dark:border-[#362B2B]">
-        <div className="flex flex-col gap-4 flex-1">
-          <div className="text-black dark:text-white text-base font-medium leading-6">
-            Savy – Your Movie Expert 🤖🎬
-          </div>
-          <div className="flex flex-col gap-2">
+    <>
+      <nav className="flex flex-col w-[319px] max-md:w-full max-md:h-auto max-sm:hidden font-poppins">
+        <div className="flex min-h-[700px] flex-col bg-white dark:bg-[#171212] p-4 max-md:min-h-[auto] border-r border-gray-200 dark:border-[#362B2B]">
+          <div className="flex flex-col gap-4 flex-1">
+            <div className="text-black dark:text-white text-base font-medium leading-6">
+              Savyy – Your Movie Expert 🤖🎬
+            </div>
+            
             {navigationItems.map((item) => (
               <NavigationItem
                 key={item.id}
@@ -219,10 +235,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <button
                       key={movie.id}
                       onClick={() => onMovieSelect?.(movie.title)}
-                      className={`flex flex-col items-start gap-1 px-3 py-2 rounded-xl w-full text-left transition-colors ${
+                      onMouseEnter={(e) => handleMouseEnter(movie, e)}
+                      onMouseMove={handleMouseMove}
+                      onMouseLeave={handleMouseLeave}
+                      className={`flex flex-col items-start gap-1 px-3 py-2 rounded-xl w-full text-left transition-all duration-200 hover:scale-105 ${
                         selectedMovie === movie.title
-                          ? 'bg-purple-500 text-white dark:bg-purple-600 dark:text-white'
-                          : 'bg-gray-100 text-black dark:bg-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-900/30 dark:hover:text-white'
+                          ? 'bg-purple-500 text-white dark:bg-purple-600 dark:text-white shadow-lg'
+                          : 'bg-gray-100 text-black dark:bg-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-900/30 dark:hover:text-white hover:shadow-md'
                       }`}
                     >
                       <div className="text-sm font-medium truncate w-full">
@@ -252,7 +271,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => onCategorySelect?.('settings')}
           />
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      <MovieTooltip 
+        movie={hoveredMovie!}
+        isVisible={!!hoveredMovie}
+        position={mousePosition}
+      />
+    </>
   );
 };
