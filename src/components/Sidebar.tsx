@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { NavigationItem } from './NavigationItem';
 import { MovieTooltip } from './MovieTooltip';
@@ -181,86 +182,87 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <span className="text-sm font-medium">Chat History</span>
               </button>
             </div>
-          </div>
 
-          {currentCategoryLabel && (
-            <div className="flex flex-col gap-2">
-              <div className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-5 px-3">
-                {currentCategoryLabel} Section 
-              </div>
+            {currentCategoryLabel && (
+              <div className="flex flex-col gap-2">
+                <div className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-5 px-3">
+                  {currentCategoryLabel} Section 
+                </div>
 
-              {/* Search Bar */}
-              {!loading && !error && movies.length > 0 && (
-                <div className="relative px-3 mb-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
-                    <input
-                      type="text"
-                      placeholder="Search movies..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-                    />
+                {/* Search Bar */}
+                {!loading && !error && movies.length > 0 && (
+                  <div className="relative px-3 mb-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+                      <input
+                        type="text"
+                        placeholder="Search movies..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {loading && (
-                <div className="flex items-center justify-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
-                </div>
-              )}
+                {/* Loading, Error, and Movie List States */}
+                {loading && (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
+                  </div>
+                )}
 
-              {error && (
-                <div className="px-3 py-2 text-red-500 dark:text-red-400 text-sm">
-                  Failed to load movies. Please try again.
-                </div>
-              )}
+                {error && (
+                  <div className="px-3 py-2 text-red-500 dark:text-red-400 text-sm">
+                    Failed to load movies. Please try again.
+                  </div>
+                )}
 
-              {!loading && !error && movies.length === 0 && (
-                <div className="px-3 py-2 text-gray-500 dark:text-gray-500 text-sm">
-                  No movies found in this category.
-                </div>
-              )}
+                {!loading && !error && movies.length === 0 && (
+                  <div className="px-3 py-2 text-gray-500 dark:text-gray-500 text-sm">
+                    No movies found in this category.
+                  </div>
+                )}
 
-              {!loading && !error && filteredMovies.length === 0 && searchTerm && (
-                <div className="px-3 py-2 text-gray-500 dark:text-gray-500 text-sm">
-                  No movies found matching "{searchTerm}".
-                </div>
-              )}
+                {!loading && !error && filteredMovies.length === 0 && searchTerm && (
+                  <div className="px-3 py-2 text-gray-500 dark:text-gray-500 text-sm">
+                    No movies found matching "{searchTerm}".
+                  </div>
+                )}
 
-              {!loading && !error && filteredMovies.length > 0 && (
-                <div className="flex flex-col gap-1 max-h-[300px] overflow-y-auto">
-                  {filteredMovies.map((movie) => (
-                    <button
-                      key={movie.id}
-                      onClick={() => onMovieSelect?.(movie.title)}
-                      onMouseEnter={(e) => handleMouseEnter(movie, e)}
-                      onMouseMove={handleMouseMove}
-                      onMouseLeave={handleMouseLeave}
-                      className={`flex flex-col items-start gap-1 px-3 py-2 rounded-xl w-full text-left transition-all duration-200 hover:scale-105 ${
-                        selectedMovie === movie.title
-                          ? 'bg-purple-500 text-white dark:bg-purple-600 dark:text-white shadow-lg'
-                          : 'bg-gray-100 text-black dark:bg-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-900/30 dark:hover:text-white hover:shadow-md'
-                      }`}
-                    >
-                      <div className="text-sm font-medium truncate w-full">
-                        {highlightSearchTerm(movie.title, searchTerm)}
-                      </div>
-                      <div className="flex items-center justify-between w-full text-xs opacity-75">
-                        <span className="truncate flex-1 mr-2">{formatGenres(movie)}</span>
-                        {movie.score && (
-                          <span className="bg-yellow-500 text-black px-1.5 py-0.5 rounded text-xs font-medium">
-                            ⭐ {movie.score}
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+                {!loading && !error && filteredMovies.length > 0 && (
+                  <div className="flex flex-col gap-1 max-h-[300px] overflow-y-auto">
+                    {filteredMovies.map((movie) => (
+                      <button
+                        key={movie.id}
+                        onClick={() => onMovieSelect?.(movie.title)}
+                        onMouseEnter={(e) => handleMouseEnter(movie, e)}
+                        onMouseMove={handleMouseMove}
+                        onMouseLeave={handleMouseLeave}
+                        className={`flex flex-col items-start gap-1 px-3 py-2 rounded-xl w-full text-left transition-all duration-200 hover:scale-105 ${
+                          selectedMovie === movie.title
+                            ? 'bg-purple-500 text-white dark:bg-purple-600 dark:text-white shadow-lg'
+                            : 'bg-gray-100 text-black dark:bg-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-900/30 dark:hover:text-white hover:shadow-md'
+                        }`}
+                      >
+                        <div className="text-sm font-medium truncate w-full">
+                          {highlightSearchTerm(movie.title, searchTerm)}
+                        </div>
+                        <div className="flex items-center justify-between w-full text-xs opacity-75">
+                          <span className="truncate flex-1 mr-2">{formatGenres(movie)}</span>
+                          {movie.score && (
+                            <span className="bg-yellow-500 text-black px-1.5 py-0.5 rounded text-xs font-medium">
+                              ⭐ {movie.score}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col gap-1 mt-4">
