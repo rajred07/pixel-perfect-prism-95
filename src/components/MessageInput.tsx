@@ -1,6 +1,7 @@
-
-import React, { useState, KeyboardEvent } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, MicOff } from 'lucide-react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
 import { SuggestionPills } from './SuggestionPills';
 
 interface MessageInputProps {
@@ -10,59 +11,154 @@ interface MessageInputProps {
   selectedMovie: string;
 }
 
-const thinkingMessages = [
-  "🤖 Savyy is thinking about the perfect reply for you...",
-  "🍿 Just a sec! Savyy is searching her movie memory...",
-  "🎬 Savyy is queuing up a great answer...",
-  "🧠 Hmm... Savyy is having a movie moment...",
-  "💖 Savyy's cooking up something sweet for you...",
-  "🎞️ Savyy's flipping through film reels in her mind...",
-  "🎥 One moment! Savyy is rolling the perfect scene...",
-  "✨ Savyy is crafting a cinematic reply just for you...",
-  "📽️ Savyy paused the tape — thinking deeply...",
-  "👀 Savyy is watching all the movies in fast-forward...",
-  "📚 Savyy is browsing her mental movie library...",
-  "🌟 Hold tight! Savyy is picking a 5-star answer...",
-  "🕵️‍♀️ Savyy is investigating behind the scenes...",
-  "🎭 Savyy is acting out the possibilities in her head...",
-  "📼 Rewinding memories… Savyy's almost there!",
-  "🍫 Like a good movie snack, Savyy's answer is loading...",
-  "🛋️ Savyy's settling into the couch to think with you...",
-  "🎧 Savyy's humming a soundtrack while thinking...",
-  "🧸 Savyy's hugging a film reel and thinking deeply...",
-  "📀 Savyy's burning the perfect answer onto a DVD...",
-  "💡 Idea loading… Savyy's script is almost ready!",
-  "⏳ A tiny moment — Savyy's rolling the credits of her thoughts..."
-];
-
-const quickMessages = [
-  "🍿 Just a sec! Savyy is searching her movie memory...",
-  "🎬 Savyy is queuing up a great answer...",
-  "✨ Savyy is crafting a cinematic reply just for you...",
-  "💡 Idea loading… Savyy's script is almost ready!"
-];
-
-const slowMessages = [
-  "🍫 This one's taking a bit… grabbing popcorn!",
-  "📼 Rewinding memories… Savyy's almost there!",
-  "🎭 Savyy is acting out all the possibilities in her head...",
-  "🧠 Deep thinking mode activated... Savyy's really pondering this one!"
-];
+const THINKING_MESSAGES = {
+  quick: [
+    "🍿 Just a sec! Savyy is searching her movie memory...",
+    "🎬 Savyy is queuing up a great answer...",
+    "✨ Savyy is crafting a cinematic reply just for you...",
+    "🎞️ Savyy's flipping through film reels in her mind...",
+    "🎥 One moment! Savyy is rolling the perfect scene...",
+    "👀 Savyy is watching all the movies in fast-forward...",
+    "📚 Savyy is browsing her mental movie library...",
+    "🌟 Hold tight! Savyy is picking a 5-star answer...",
+  ],
+  slow: [
+    "Savyy is thinking about the perfect reply for you...",
+    "🧠 Hmm... Savyy is having a movie moment...",
+    "💖 Savyy's cooking up something sweet for you...",
+    "📽️ Savyy paused the tape — thinking deeply...",
+    "🕵️‍♀️ Savyy is investigating behind the scenes...",
+    "🎭 Savyy is acting out the possibilities in her head...",
+    "📼 Rewinding memories… Savyy's almost there!",
+    "🍫 Like a good movie snack, Savyy's answer is loading...",
+    "🛋️ Savyy's settling into the couch to think with you...",
+    "🎧 Savyy's humming a soundtrack while thinking...",
+    "🧸 Savyy's hugging a film reel and thinking deeply...",
+    "📀 Savyy's burning the perfect answer onto a DVD...",
+    "💡 Idea loading… Savyy's script is almost ready!",
+    "⏳ A tiny moment — Savyy's rolling the credits of thoughts...",
+  ],
+  error: [
+    "🎬 Plot twist! Something went wrong, but Savyy's fixing it...",
+    "📽️ Technical difficulties! Savyy's adjusting the projector...",
+    "🎞️ Film got tangled! Savyy's untangling the situation...",
+    "🎭 Intermission! Savyy's working behind the scenes...",
+  ]
+};
 
 export const MessageInput: React.FC<MessageInputProps> = ({
   onSendMessage,
-  placeholder = "Type your message here...",
+  placeholder = 'Type your message here...',
   selectedCategory,
-  selectedMovie
+  selectedMovie,
 }) => {
   const [message, setMessage] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
-  const [currentThinkingMessage, setCurrentThinkingMessage] = useState('');
+  const [thinkingMessage, setThinkingMessage] = useState('');
+  const recognition = useRef<SpeechRecognition | null>(null);
+  const thinkingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const messageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const getRandomMessage = (isSlowResponse = false) => {
-    const messageArray = isSlowResponse ? slowMessages : quickMessages;
-    return messageArray[Math.floor(Math.random() * messageArray.length)];
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition.current = new SpeechRecognition();
+      recognition.current.continuous = false;
+      recognition.current.interimResults = false;
+      recognition.current.lang = 'en-US';
+
+      recognition.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setMessage(transcript);
+        setIsListening(false);
+      };
+
+      recognition.current.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognition.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+
+    return () => {
+      if (thinkingTimeoutRef.current) {
+        clearTimeout(thinkingTimeoutRef.current);
+      }
+      if (messageTimeoutRef.current) {
+        clearTimeout(messageTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const getRandomThinkingMessage = (type: 'quick' | 'slow' | 'error') => {
+    const messages = THINKING_MESSAGES[type];
+    return messages[Math.floor(Math.random() * messages.length)];
+  };
+
+  const showThinkingMessage = () => {
+    setIsThinking(true);
+    setThinkingMessage(getRandomThinkingMessage('quick'));
+
+    // Switch to slower message after 1 minute
+    thinkingTimeoutRef.current = setTimeout(() => {
+      setThinkingMessage(getRandomThinkingMessage('slow'));
+    }, 60000);
+
+    // Cycle through different messages every 10 seconds
+    const cycleThroughMessages = () => {
+      messageTimeoutRef.current = setTimeout(() => {
+        setThinkingMessage(getRandomThinkingMessage('quick'));
+        cycleThroughMessages();
+      }, 10000);
+    };
+    cycleThroughMessages();
+  };
+
+  const hideThinkingMessage = () => {
+    setIsThinking(false);
+    setThinkingMessage('');
+    if (thinkingTimeoutRef.current) {
+      clearTimeout(thinkingTimeoutRef.current);
+    }
+    if (messageTimeoutRef.current) {
+      clearTimeout(messageTimeoutRef.current);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+
+    const userMessage = message.trim();
+    setMessage('');
+
+    // Send user message immediately
+    onSendMessage(userMessage, 'user');
+
+    // Show thinking message
+    showThinkingMessage();
+
+    try {
+      // Simulate bot response delay
+      await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
+      
+      // Generate bot response
+      const botResponse = getBotResponse(userMessage);
+      
+      // Hide thinking message and send bot response
+      hideThinkingMessage();
+      onSendMessage(botResponse, 'bot');
+    } catch (error) {
+      // Show error thinking message briefly
+      setThinkingMessage(getRandomThinkingMessage('error'));
+      setTimeout(() => {
+        hideThinkingMessage();
+        onSendMessage("I'm having trouble processing that right now. Could you try again?", 'bot');
+      }, 2000);
+    }
   };
 
   const getBotResponse = (userMessage: string): string => {
@@ -73,40 +169,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
-  const handleSend = () => {
-    if (message.trim()) {
-      // Send user message immediately
-      onSendMessage(message.trim(), 'user');
-      setMessage('');
-      
-      // Start thinking state
-      setIsThinking(true);
-      const startTime = Date.now();
-      setCurrentThinkingMessage(getRandomMessage(false));
-      
-      // Check if response is taking longer than 1 minute
-      const slowResponseTimer = setTimeout(() => {
-        if (isThinking) {
-          setCurrentThinkingMessage(getRandomMessage(true));
-        }
-      }, 60000); // 1 minute
-      
-      // Simulate bot response delay
-      setTimeout(() => {
-        const responseTime = Date.now() - startTime;
-        setIsThinking(false);
-        clearTimeout(slowResponseTimer);
-        
-        const botResponse = getBotResponse(message.trim());
-        onSendMessage(botResponse, 'bot');
-      }, Math.random() * 2000 + 1000); // 1-3 seconds delay
-    }
-  };
-
-  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+  const toggleListening = () => {
+    if (isListening) {
+      recognition.current?.stop();
+      setIsListening(false);
+    } else {
+      recognition.current?.start();
+      setIsListening(true);
     }
   };
 
@@ -114,87 +183,54 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     setMessage(suggestion);
   };
 
-  const startListening = () => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
-      
-      recognition.onstart = () => {
-        setIsListening(true);
-      };
-      
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setMessage(transcript);
-        setIsListening(false);
-      };
-      
-      recognition.onerror = () => {
-        setIsListening(false);
-      };
-      
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-      
-      recognition.start();
-    }
-  };
-
-  const stopListening = () => {
-    setIsListening(false);
-  };
-
   return (
-    <div className="border-t border-gray-300 dark:border-[#362B2B] bg-white dark:bg-[#171212] p-4 font-poppins">
-      <SuggestionPills onSuggestionClick={handleSuggestionClick} />
-      
-      {/* Thinking indicator */}
+    <div className="border-t border-border bg-background p-4">
+      {/* Thinking Message Display */}
       {isThinking && (
-        <div className="mb-3 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-          <div className="flex space-x-1">
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+        <div className="mb-3 flex items-center justify-center">
+          <div className="flex items-center space-x-2 rounded-full bg-muted px-4 py-2 text-sm text-muted-foreground animate-pulse">
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
+            <span className="font-medium">{thinkingMessage}</span>
           </div>
-          <span className="italic">{currentThinkingMessage}</span>
         </div>
       )}
+
+      <SuggestionPills
+        selectedCategory={selectedCategory}
+        selectedMovie={selectedMovie}
+        onSuggestionClick={handleSuggestionClick}
+      />
       
-      <div className="flex items-center gap-3">
-        <div className="flex-1 relative">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={placeholder}
+      <form onSubmit={handleSubmit} className="flex space-x-2 mt-3">
+        <Input
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder={placeholder}
+          className="flex-1"
+          disabled={isThinking}
+        />
+        
+        {recognition.current && (
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={toggleListening}
+            className={isListening ? 'bg-red-500 text-white' : ''}
             disabled={isThinking}
-            className="w-full px-4 py-3 border border-gray-300 dark:border-[#362B2B] rounded-xl bg-white dark:bg-[#171212] text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-        </div>
+          >
+            {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+          </Button>
+        )}
         
-        <button
-          onClick={isListening ? stopListening : startListening}
-          className="p-3 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-gray-100 dark:hover:bg-[#362B2B] rounded-xl transition-colors"
-          title={isListening ? "Stop listening" : "Start voice input"}
-        >
-          {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-        </button>
-        
-        <button
-          onClick={handleSend}
-          disabled={!message.trim() || isThinking}
-          className="p-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
-          title="Send message"
-        >
-          <Send className="w-5 h-5" />
-        </button>
-      </div>
+        <Button type="submit" size="icon" disabled={!message.trim() || isThinking}>
+          <Send className="h-4 w-4" />
+        </Button>
+      </form>
     </div>
   );
 };
