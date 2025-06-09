@@ -2,10 +2,16 @@
 import React from 'react';
 
 interface SuggestionPillsProps {
+  selectedCategory: string;
+  selectedMovie: string;
   onSuggestionClick: (suggestion: string) => void;
 }
 
-export const SuggestionPills: React.FC<SuggestionPillsProps> = ({ onSuggestionClick }) => {
+export const SuggestionPills: React.FC<SuggestionPillsProps> = ({ 
+  selectedCategory, 
+  selectedMovie, 
+  onSuggestionClick 
+}) => {
   const suggestions = [
     "Is it worth watching?",
     "Any similar recommendations?",
