@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { SuggestionPills } from "./SuggestionPills";
 
@@ -15,6 +16,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   selectedMovie,
 }) => {
   const [message, setMessage] = useState("");
+  const [isThinking, setIsThinking] = useState(false);
+  const [thinkingMessage, setThinkingMessage] = useState("");
 
   const thinkingMessages = [
     "🍿 Just a sec! Savyy is searching her movie memory...",
@@ -46,18 +49,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim()) {
-      // Send user message to chat
+    if (message.trim() && !isThinking) {
       const userMessage = message.trim();
-      onSendMessage(userMessage, "user"); // Set sender as 'user'
+      onSendMessage(userMessage, "user");
       setMessage("");
 
-      // Show thinking message immediately
-      const thinkingMessage = getRandomThinkingMessage();
-      onSendMessage(thinkingMessage, "bot");
+      // Show thinking indicator
+      setIsThinking(true);
+      setThinkingMessage(getRandomThinkingMessage());
 
       try {
-        // Send request to FastAPI backend
         const response = await fetch("http://localhost:8000/query", {
           method: "POST",
           headers: {
@@ -78,15 +79,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         const botResponse =
           data.response || "Sorry, I could not process your request.";
 
-        // Replace thinking message with actual bot response
-        onSendMessage(botResponse, "bot"); // Set sender as 'bot'
+        onSendMessage(botResponse, "bot");
       } catch (error) {
         console.error("Error communicating with backend:", error);
-        // Replace thinking message with error message
         onSendMessage(
           "Sorry, there was an error processing your request. Please try again later.",
           "bot"
-        ); // Set sender as 'bot'
+        );
+      } finally {
+        setIsThinking(false);
+        setThinkingMessage("");
       }
     }
   };
@@ -99,15 +101,15 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   const handleSuggestionClick = async (suggestion: string) => {
-    // Send suggestion as user message
-    onSendMessage(suggestion, "user"); // Set sender as 'user'
+    if (isThinking) return;
 
-    // Show thinking message immediately
-    const thinkingMessage = getRandomThinkingMessage();
-    onSendMessage(thinkingMessage, "bot");
+    onSendMessage(suggestion, "user");
+
+    // Show thinking indicator
+    setIsThinking(true);
+    setThinkingMessage(getRandomThinkingMessage());
 
     try {
-      // Send request to FastAPI backend
       const response = await fetch("http://localhost:8000/query", {
         method: "POST",
         headers: {
@@ -128,15 +130,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       const botResponse =
         data.response || "Sorry, I could not process your request.";
 
-      // Replace thinking message with actual bot response
-      onSendMessage(botResponse, "bot"); // Set sender as 'bot'
+      onSendMessage(botResponse, "bot");
     } catch (error) {
       console.error("Error communicating with backend:", error);
-      // Replace thinking message with error message
       onSendMessage(
         "Sorry, there was an error processing your request. Please try again later.",
         "bot"
-      ); // Set sender as 'bot'
+      );
+    } finally {
+      setIsThinking(false);
+      setThinkingMessage("");
     }
   };
 
@@ -154,12 +157,28 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   return (
     <div className="flex flex-col font-poppins border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-[#171212]">
       <SuggestionPills onSuggestionClick={handleSuggestionClick} />
-      <div className="flex flex-col px-6 py-4 max-w-4xl mx-auto w-full">
+      
+      {/* Thinking indicator - outside of chat bubbles */}
+      {isThinking && (
+        <div className="px-4 sm:px-6 py-2">
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
+            <span className="italic">{thinkingMessage}</span>
+          </div>
+        </div>
+      )}
+      
+      <div className="flex flex-col px-4 sm:px-6 py-3 sm:py-4 max-w-4xl mx-auto w-full">
         <form onSubmit={handleSubmit} className="flex">
-          <div className="flex items-center flex-1 h-12 rounded-xl bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 backdrop-blur-sm border border-purple-200/50 dark:border-purple-700/50 shadow-lg">
+          <div className="flex items-center flex-1 h-11 sm:h-12 rounded-xl bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 backdrop-blur-sm border border-purple-200/50 dark:border-purple-700/50 shadow-lg">
             <button
               type="submit"
-              className="flex justify-center items-center bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 w-12 h-12 rounded-l-xl transition-all duration-200 shadow-md hover:shadow-lg"
+              disabled={isThinking}
+              className="flex justify-center items-center bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed w-11 sm:w-12 h-11 sm:h-12 rounded-l-xl transition-all duration-200 shadow-md hover:shadow-lg"
               aria-label="Send message"
             >
               <div dangerouslySetInnerHTML={{ __html: searchIcon }} />
@@ -169,8 +188,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={placeholder}
-              className="text-gray-700 dark:text-gray-200 text-base font-normal leading-6 flex-1 bg-transparent px-4 py-3 rounded-r-xl border-none outline-none placeholder-gray-500 dark:placeholder-gray-400"
+              disabled={isThinking}
+              placeholder={isThinking ? "Savyy is thinking..." : placeholder}
+              className="text-gray-700 dark:text-gray-200 text-sm sm:text-base font-normal leading-6 flex-1 bg-transparent px-3 sm:px-4 py-2 sm:py-3 rounded-r-xl border-none outline-none placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50"
               aria-label="Message input"
             />
           </div>
