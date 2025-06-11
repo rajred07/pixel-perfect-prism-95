@@ -58,7 +58,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       setThinkingMessage(getRandomThinkingMessage());
 
       try {
-        const response = await fetch("http://localhost:8001/predict", {
+        const response = await fetch("https://8000-01jxdcchrfjyky5nkgqf5y8f2j.cloudspaces.litng.ai/predict", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -107,7 +107,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     setThinkingMessage(getRandomThinkingMessage());
 
     try {
-      const response = await fetch("http://localhost:8001/predict", {
+      const response = await fetch("https://8000-01jxdcchrfjyky5nkgqf5y8f2j.cloudspaces.litng.ai/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
